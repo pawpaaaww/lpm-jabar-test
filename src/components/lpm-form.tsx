@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,8 @@ import { ReasonField } from './reason';
 import { StyleInput } from './style-input';
 import { Checkbox } from './ui/checkbox';
 import { simulateBackendResponse } from '@/lib/simulate-backend';
+import { useToast } from '@/hooks/use-toast';
+import { PreviewData } from './preview';
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -32,6 +34,9 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
   const [cities, setCities] = useState<LocationData[]>([]);
   const [districts, setDistricts] = useState<LocationData[]>([]);
   const [villages, setVillages] = useState<LocationData[]>([]);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -106,21 +111,59 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
     }
   };
 
-  async function onSubmit(data: FormValues) {
-    setIsLoading(true);
-    try {
-      const response = await simulateBackendResponse(data);
-      console.log('Data submitted successfully:', response.data);
-      alert('Data berhasil dikirim!');
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert(
-        error instanceof Error ? error.message : 'Terjadi kesalahan saat mengirim data. Silakan coba lagi.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: FormValues) => {
+      setIsLoading(true);
+      try {
+        await simulateBackendResponse(data);
+        const provinceData = provinces.find((p) => p.id === data.provinsi);
+        const cityData = cities.find((c) => c.id === data.kabKota);
+        const districtData = districts.find((d) => d.id === data.kecamatan);
+        const villageData = villages.find((v) => v.id === data.kelurahan);
+
+        const dataWithLocationNames = {
+          ...data,
+          provinsi: provinceData ? provinceData.name : data.provinsi,
+          kabKota: cityData ? cityData.name : data.kabKota,
+          kecamatan: districtData ? districtData.name : data.kecamatan,
+          kelurahan: villageData ? villageData.name : data.kelurahan,
+        };
+        setSubmittedData(dataWithLocationNames);
+        setShowPreview(true);
+        toast({
+          title: 'Data berhasil dikirim',
+          description: 'Silakan periksa preview data Anda.',
+        });
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        if (error instanceof Error && error.message.includes('Server sedang mengalami beban tinggi')) {
+          toast({
+            title: 'Error Server',
+            description: 'Server sedang mengalami beban tinggi. Silakan coba lagi nanti.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Gagal mengirim data',
+            description:
+              error instanceof Error
+                ? error.message
+                : 'Terjadi kesalahan saat mengirim data. Silakan coba lagi.',
+            variant: 'destructive',
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast, provinces, cities, districts, villages]
+  );
+
+  const handleClosePreview = useCallback(() => {
+    setShowPreview(false);
+    setSubmittedData(null);
+    form.reset();
+  }, [form]);
 
   return (
     <div
@@ -436,6 +479,13 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
           </Button>
         </form>
       </Form>
+      {submittedData && (
+        <PreviewData
+          data={submittedData}
+          onClose={handleClosePreview}
+          isOpen={showPreview}
+        />
+      )}
     </div>
   );
 }
