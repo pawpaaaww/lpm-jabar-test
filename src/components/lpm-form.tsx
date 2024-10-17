@@ -15,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getCities, getDistricts, getProvinces, getVillages } from '@/utils/wilayah-api';
 import { LocationField } from './location';
 import { ReasonField } from './reason';
+import { StyleInput } from './style-input';
+import { Checkbox } from './ui/checkbox';
+import { simulateBackendResponse } from '@/lib/simulate-backend';
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -34,11 +37,11 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       nama: '',
-      nik: 0,
-      noKK: 0,
+      nik: undefined,
+      noKK: undefined,
       fotoKTP: undefined,
       fotoKK: undefined,
-      umur: 25,
+      umur: undefined,
       jenisKelamin: 'Laki-laki',
       provinsi: '',
       kabKota: '',
@@ -47,8 +50,8 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
       alamat: '',
       rt: '',
       rw: '',
-      penghasilanSebelum: 0,
-      penghasilanSetelah: 0,
+      penghasilanSebelum: undefined,
+      penghasilanSetelah: undefined,
       alasanBantuan: 'Kehilangan pekerjaan',
       pernyataan: false,
     },
@@ -103,13 +106,23 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
     }
   };
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    setIsLoading(true);
+  async function onSubmit(data: FormValues) {
+    const isConfirmed = window.confirm('Apakah Anda yakin ingin mengirim data ini?');
+    if (!isConfirmed) return;
 
-    setTimeout(() => {
+    setIsLoading(true);
+    try {
+      const response = await simulateBackendResponse(data);
+      console.log('Data submitted successfully:', response.data);
+      alert('Data berhasil dikirim!');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(
+        error instanceof Error ? error.message : 'Terjadi kesalahan saat mengirim data. Silakan coba lagi.'
+      );
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   }
 
   return (
@@ -118,7 +131,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
       {...props}>
       <Form {...form}>
         <form
-          onSubmit={onSubmit}
+          onSubmit={form.handleSubmit(onSubmit)}
           className='space-y-2'>
           <FormField
             control={form.control}
@@ -148,6 +161,12 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                     placeholder='Masukkan NIK lengkap'
                     {...field}
                     disabled={isLoading}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                      field.onChange(value === '' ? undefined : Number(value));
+                    }}
+                    value={field.value || ''}
+                    maxLength={16}
                   />
                 </FormControl>
                 <FormMessage />
@@ -165,61 +184,31 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                     placeholder='Masukkan Kartu Keluarga lengkap'
                     {...field}
                     disabled={isLoading}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                      field.onChange(value === '' ? undefined : Number(value));
+                    }}
+                    value={field.value || ''}
+                    maxLength={16}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
+          <StyleInput
             control={form.control}
             name='fotoKTP'
-            render={({ field: { onChange, value, ...field } }) => (
-              <FormItem>
-                <FormLabel>Foto KTP</FormLabel>
-                <FormControl>
-                  <Input
-                    type='file'
-                    accept='image/jpeg,image/png,image/bmp'
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onChange(file);
-                      }
-                    }}
-                    {...field}
-                    value={value instanceof File ? undefined : (value as unknown as string)}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Foto KTP'
+            accept='image/jpeg,image/png,image/bmp'
+            disabled={isLoading}
           />
-          <FormField
+          <StyleInput
             control={form.control}
             name='fotoKK'
-            render={({ field: { onChange, value, ...field } }) => (
-              <FormItem>
-                <FormLabel>Foto KK</FormLabel>
-                <FormControl>
-                  <Input
-                    type='file'
-                    accept='image/jpeg,image/png,image/bmp'
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onChange(file);
-                      }
-                    }}
-                    {...field}
-                    value={value instanceof File ? undefined : (value as unknown as string)}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Foto KK'
+            accept='image/jpeg,image/png,image/bmp'
+            disabled={isLoading}
           />
           <FormField
             control={form.control}
@@ -229,9 +218,12 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                 <FormLabel>Umur</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='Masukkan Umur '
+                    placeholder='Masukkan Umur Berumur lebih dari atau sama dengan 25 tahun '
                     {...field}
                     disabled={isLoading}
+                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    value={field.value || ''}
+                    min={25}
                   />
                 </FormControl>
                 <FormMessage />
@@ -246,7 +238,8 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                 <FormLabel>Jenis Kelamin</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}>
+                  defaultValue={field.value}
+                  disabled={isLoading}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder='Pilih jenis kelamin' />
@@ -268,6 +261,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
             options={provinces}
             placeholder='Pilih atau isi provinsi'
             onValueChange={handleProvinceChange}
+            disabled={isLoading}
           />
           <LocationField
             control={form.control}
@@ -276,8 +270,8 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
             options={cities}
             placeholder='Pilih atau isi kabupaten/kota'
             onValueChange={handleCityChange}
+            disabled={isLoading}
           />
-
           <LocationField
             control={form.control}
             name='kecamatan'
@@ -285,6 +279,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
             options={districts}
             placeholder='Pilih atau isi kecamatan'
             onValueChange={handleDistrictChange}
+            disabled={isLoading}
           />
 
           <LocationField
@@ -294,6 +289,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
             options={villages}
             placeholder='Pilih atau isi kelurahan/desa'
             onValueChange={() => {}}
+            disabled={isLoading}
           />
           <FormField
             control={form.control}
@@ -357,6 +353,9 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                     placeholder='Masukkan Penghasilan sebelum pandemi'
                     {...field}
                     disabled={isLoading}
+                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    value={field.value || ''}
+                    min={0}
                   />
                 </FormControl>
                 <FormMessage />
@@ -374,6 +373,9 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                     placeholder='Masukkan Penghasilan setelah pandemi'
                     {...field}
                     disabled={isLoading}
+                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    value={field.value || ''}
+                    min={0}
                   />
                 </FormControl>
                 <FormMessage />
@@ -383,9 +385,32 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
           <ReasonField
             control={form.control}
             name='alasanBantuan'
+            disabled={isLoading}
           />
-
-          <Button disabled={isLoading}>
+          <FormField
+            control={form.control}
+            name='pernyataan'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border-transparent p-4'>
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className='space-y-1 leading-none'>
+                  <FormLabel>
+                    Saya menyatakan bahwa data yang diisikan adalah benar dan siap mempertanggungjawabkan
+                    apabila ditemukan ketidaksesuaian dalam data tersebut.
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+          <Button
+            type='submit'
+            disabled={isLoading}>
             {isLoading && <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />}
             Submit
           </Button>

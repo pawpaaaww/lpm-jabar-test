@@ -6,11 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface ReasonFieldProps {
   control: any;
   name: string;
+  disabled: boolean;
 }
 
 const reasons = ['Kehilangan pekerjaan', 'Kepala keluarga', 'Tergolong fakir/miskin', 'Lainnya'];
 
-export function ReasonField({ control, name }: ReasonFieldProps) {
+export function ReasonField({ control, name, disabled }: ReasonFieldProps) {
   const [isOther, setIsOther] = useState(false);
 
   return (
@@ -31,6 +32,7 @@ export function ReasonField({ control, name }: ReasonFieldProps) {
                     setIsOther(false);
                   }
                 }}
+                disabled={disabled}
               />
             ) : (
               <Select
@@ -42,8 +44,9 @@ export function ReasonField({ control, name }: ReasonFieldProps) {
                     field.onChange(value);
                   }
                 }}
-                value={field.value}>
-                <SelectTrigger>
+                value={field.value}
+                disabled={disabled}>
+                <SelectTrigger disabled={disabled}>
                   <SelectValue placeholder='Pilih alasan' />
                 </SelectTrigger>
                 <SelectContent>
