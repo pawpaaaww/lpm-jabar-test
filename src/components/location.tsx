@@ -11,6 +11,7 @@ interface LocationFieldProps {
   options: { id: string; name: string }[];
   placeholder: string;
   onValueChange: (value: string) => void;
+  disabled: boolean;
 }
 
 export function LocationField({
@@ -20,6 +21,7 @@ export function LocationField({
   options,
   placeholder,
   onValueChange,
+  disabled,
 }: LocationFieldProps) {
   const [isCustomInput, setIsCustomInput] = useState(false);
 
@@ -39,6 +41,7 @@ export function LocationField({
                   field.onChange(e);
                   onValueChange(e.target.value);
                 }}
+                disabled={disabled}
               />
             ) : (
               <Select
@@ -46,8 +49,9 @@ export function LocationField({
                   field.onChange(value);
                   onValueChange(value);
                 }}
+                disabled={disabled}
                 value={field.value}>
-                <SelectTrigger>
+                <SelectTrigger disabled={disabled}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
@@ -66,6 +70,7 @@ export function LocationField({
             type='button'
             variant='outline'
             size='sm'
+            disabled={disabled}
             onClick={() => setIsCustomInput(!isCustomInput)}>
             {isCustomInput ? 'Pilih dari daftar' : 'Isi manual'}
           </Button>
