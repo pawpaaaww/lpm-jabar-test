@@ -107,9 +107,6 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
   };
 
   async function onSubmit(data: FormValues) {
-    const isConfirmed = window.confirm('Apakah Anda yakin ingin mengirim data ini?');
-    if (!isConfirmed) return;
-
     setIsLoading(true);
     try {
       const response = await simulateBackendResponse(data);
@@ -127,52 +124,56 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
 
   return (
     <div
-      className={cn('grid gap-6', className)}
+      className={cn('w-full max-w-4xl mx-auto', className)}
       {...props}>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='space-y-2'>
-          <FormField
-            control={form.control}
-            name='nama'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nama</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan Nama Lengkap'
-                    {...field}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='nik'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>NIK</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan NIK lengkap'
-                    {...field}
-                    disabled={isLoading}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 16);
-                      field.onChange(value === '' ? undefined : Number(value));
-                    }}
-                    value={field.value || ''}
-                    maxLength={16}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          className='space-y-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='nama'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nama</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Masukkan Nama Lengkap'
+                      {...field}
+                      disabled={isLoading}
+                      className='w-full'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='nik'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>NIK</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='Masukkan NIK lengkap'
+                      {...field}
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                        field.onChange(value === '' ? undefined : Number(value));
+                      }}
+                      value={field.value || ''}
+                      maxLength={16}
+                      className='w-full'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name='noKK'
@@ -190,107 +191,116 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                     }}
                     value={field.value || ''}
                     maxLength={16}
+                    className='w-full'
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <StyleInput
-            control={form.control}
-            name='fotoKTP'
-            label='Foto KTP'
-            accept='image/jpeg,image/png,image/bmp'
-            disabled={isLoading}
-          />
-          <StyleInput
-            control={form.control}
-            name='fotoKK'
-            label='Foto KK'
-            accept='image/jpeg,image/png,image/bmp'
-            disabled={isLoading}
-          />
-          <FormField
-            control={form.control}
-            name='umur'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Umur</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan Umur Berumur lebih dari atau sama dengan 25 tahun '
-                    {...field}
-                    disabled={isLoading}
-                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                    value={field.value || ''}
-                    min={25}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='jenisKelamin'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Jenis Kelamin</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isLoading}>
+          <div className='space-y-4'>
+            <StyleInput
+              control={form.control}
+              name='fotoKTP'
+              label='Foto KTP'
+              accept='image/jpeg,image/png,image/bmp'
+              disabled={isLoading}
+            />
+            <StyleInput
+              control={form.control}
+              name='fotoKK'
+              label='Foto KK'
+              accept='image/jpeg,image/png,image/bmp'
+              disabled={isLoading}
+            />
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='umur'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Umur</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Pilih jenis kelamin' />
-                    </SelectTrigger>
+                    <Input
+                      className='w-full'
+                      placeholder='Masukkan Umur Berumur lebih dari atau sama dengan 25 tahun '
+                      {...field}
+                      disabled={isLoading}
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                      value={field.value || ''}
+                      min={25}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value='Laki-laki'>Laki-laki</SelectItem>
-                    <SelectItem value='Perempuan'>Perempuan</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <LocationField
-            control={form.control}
-            name='provinsi'
-            label='Provinsi'
-            options={provinces}
-            placeholder='Pilih atau isi provinsi'
-            onValueChange={handleProvinceChange}
-            disabled={isLoading}
-          />
-          <LocationField
-            control={form.control}
-            name='kabKota'
-            label='Kabupaten/Kota'
-            options={cities}
-            placeholder='Pilih atau isi kabupaten/kota'
-            onValueChange={handleCityChange}
-            disabled={isLoading}
-          />
-          <LocationField
-            control={form.control}
-            name='kecamatan'
-            label='Kecamatan'
-            options={districts}
-            placeholder='Pilih atau isi kecamatan'
-            onValueChange={handleDistrictChange}
-            disabled={isLoading}
-          />
-
-          <LocationField
-            control={form.control}
-            name='kelurahan'
-            label='Kelurahan/Desa'
-            options={villages}
-            placeholder='Pilih atau isi kelurahan/desa'
-            onValueChange={() => {}}
-            disabled={isLoading}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='jenisKelamin'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jenis Kelamin</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Pilih jenis kelamin' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='Laki-laki'>Laki-laki</SelectItem>
+                      <SelectItem value='Perempuan'>Perempuan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <LocationField
+              control={form.control}
+              name='provinsi'
+              label='Provinsi'
+              options={provinces}
+              placeholder='Pilih atau isi provinsi'
+              onValueChange={handleProvinceChange}
+              disabled={isLoading}
+            />
+            <LocationField
+              control={form.control}
+              name='kabKota'
+              label='Kabupaten/Kota'
+              options={cities}
+              placeholder='Pilih atau isi kabupaten/kota'
+              onValueChange={handleCityChange}
+              disabled={isLoading}
+            />
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <LocationField
+              control={form.control}
+              name='kecamatan'
+              label='Kecamatan'
+              options={districts}
+              placeholder='Pilih atau isi kecamatan'
+              onValueChange={handleDistrictChange}
+              disabled={isLoading}
+            />
+            <LocationField
+              control={form.control}
+              name='kelurahan'
+              label='Kelurahan/Desa'
+              options={villages}
+              placeholder='Pilih atau isi kelurahan/desa'
+              onValueChange={() => {}}
+              disabled={isLoading}
+            />
+          </div>
           <FormField
             control={form.control}
             name='alamat'
@@ -299,6 +309,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
                 <FormLabel>Alamat </FormLabel>
                 <FormControl>
                   <Input
+                    className='w-full'
                     placeholder='Masukkan Alamat Lengkap Anda '
                     {...field}
                     disabled={isLoading}
@@ -308,80 +319,88 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='rt'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel> RT </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan RT Lengkap Anda '
-                    {...field}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='rw'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel> RW </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan RW  '
-                    {...field}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='penghasilanSebelum'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Penghasilan sebelum pandemi</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan Penghasilan sebelum pandemi'
-                    {...field}
-                    disabled={isLoading}
-                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                    value={field.value || ''}
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='penghasilanSetelah'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Penghasilan setelah pandemi</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='Masukkan Penghasilan setelah pandemi'
-                    {...field}
-                    disabled={isLoading}
-                    onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                    value={field.value || ''}
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='rt'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> RT </FormLabel>
+                  <FormControl>
+                    <Input
+                      className='w-full'
+                      placeholder='Masukkan RT Lengkap Anda '
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='rw'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> RW </FormLabel>
+                  <FormControl>
+                    <Input
+                      className='w-full'
+                      placeholder='Masukkan RW  '
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='penghasilanSebelum'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Penghasilan sebelum pandemi</FormLabel>
+                  <FormControl>
+                    <Input
+                      className='w-full'
+                      placeholder='Masukkan Penghasilan sebelum pandemi'
+                      {...field}
+                      disabled={isLoading}
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                      value={field.value || ''}
+                      min={0}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='penghasilanSetelah'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Penghasilan setelah pandemi</FormLabel>
+                  <FormControl>
+                    <Input
+                      className='w-full'
+                      placeholder='Masukkan Penghasilan setelah pandemi'
+                      {...field}
+                      disabled={isLoading}
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                      value={field.value || ''}
+                      min={0}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <ReasonField
             control={form.control}
             name='alasanBantuan'
@@ -409,6 +428,7 @@ export function LpmForm({ className, ...props }: UserAuthFormProps) {
             )}
           />
           <Button
+            className='w-full md:w-auto'
             type='submit'
             disabled={isLoading}>
             {isLoading && <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />}

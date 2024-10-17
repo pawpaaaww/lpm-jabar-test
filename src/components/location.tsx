@@ -72,7 +72,7 @@ export function LocationField({
             size='sm'
             disabled={disabled}
             onClick={() => setIsCustomInput(!isCustomInput)}>
-            {isCustomInput ? 'Pilih dari daftar' : 'Isi manual'}
+            {isCustomInput ? 'Pilih dari daftar' : 'Lainnnya'}
           </Button>
           <FormMessage />
         </FormItem>
